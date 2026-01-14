@@ -1,5 +1,22 @@
 # app-builder-lib
 
+## 26.4.2
+
+### Patch Changes
+
+- Chore: running `eslint --fix` on more files _[`#9502`](https://github.com/electron-userland/electron-builder/pull/9502) [`6c20eeb`](https://github.com/electron-userland/electron-builder/commit/6c20eeb1cf9fd10980cde3c9ce0602fa6b7c6972) [@mmaietta](https://github.com/mmaietta)_
+
+<details><summary>Updated 2 dependencies</summary>
+
+<small>
+
+</small>
+
+- `dmg-builder@26.4.2`
+- `electron-builder-squirrel-windows@26.4.2`
+
+</details>
+
 ## 26.4.1
 
 ### Patch Changes
