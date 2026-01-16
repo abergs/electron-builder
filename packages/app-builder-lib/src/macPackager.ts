@@ -241,8 +241,25 @@ export class MacPackager extends PlatformPackager<MacConfiguration> {
       if (prepackaged == null) {
         await this.doPack({ outDir, appOutDir: targetOutDir, platformName: "mas", arch, platformSpecificBuildOptions: masBuildOptions, targets: [target] })
         await this.sign(path.join(targetOutDir, `${this.appInfo.productFilename}.app`), targetOutDir, masBuildOptions, arch)
+        // Emit afterSign after MAS signing (signApp skips for MAS, so we emit here)
+        await this.info.emitAfterSign({
+          appOutDir: targetOutDir,
+          outDir,
+          arch,
+          targets: [target],
+          packager: this,
+          electronPlatformName: "mas",
+        })
       } else {
         await this.sign(prepackaged, targetOutDir, masBuildOptions, arch)
+        await this.info.emitAfterSign({
+          appOutDir: path.dirname(prepackaged),
+          outDir,
+          arch,
+          targets: [target],
+          packager: this,
+          electronPlatformName: "mas",
+        })
       }
     }
 
@@ -590,6 +607,15 @@ export class MacPackager extends PlatformPackager<MacConfiguration> {
   }
 
   protected async signApp(packContext: AfterPackContext, isAsar: boolean): Promise<boolean> {
+    // For MAS builds, skip signing here entirely. The pack() method will call sign()
+    // with the correct MAS options, create the .pkg installer, and emit afterSign.
+    // Signing here would use incorrect darwin options since signApp() doesn't have
+    // access to the MAS-specific configuration.
+    if (packContext.electronPlatformName === "mas") {
+      log.debug({ reason: "MAS signing is handled in pack() with correct options" }, "skipping signApp for MAS build")
+      return false
+    }
+
     const readDirectoryAndSign = async (sourceDirectory: string, directories: string[], shouldSign: (file: string) => boolean): Promise<boolean> => {
       await Promise.all(
         directories.map(async (file: string) => {

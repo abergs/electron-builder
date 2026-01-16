@@ -441,6 +441,8 @@ export abstract class PlatformPackager<DC extends PlatformSpecificBuildOptions> 
     const didSign = await this.signApp(packContext, isAsar)
     if (didSign) {
       await this.info.emitAfterSign(packContext)
+    } else if (platformName === "mas") {
+      log.debug(null, "skipping afterSign hook in doSignAfterPack for MAS build - will be emitted after signing in pack()")
     } else if (this.info.filterPackagerEventListeners("afterSign", "user").length) {
       log.warn(null, `skipping "afterSign" hook as no signing occurred, perhaps you intended "afterPack"?`)
     }
